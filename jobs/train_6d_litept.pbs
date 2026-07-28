@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+#PBS -P YOUR_PROJECT
+#PBS -q gpuhopper
+#PBS -l walltime=48:00:00
+#PBS -l mem=255GB
+#PBS -l ncpus=12
+#PBS -l ngpus=1
+#PBS -l jobfs=100GB
+#PBS -N litept6d_train
+#PBS -j oe
+
+set -euo pipefail
+
+REPO_DIR="/path/to/stellar-stream-classification"
+DATA_ROOT="/path/to/train_val_test"
+OUT_DIR="/path/to/outputs/6D-LitePT"
+ENV_DIR="/path/to/LitePT_env"
+
+module purge
+module load python3/3.12.1 gcc/13.2.0 cuda/12.8.0
+
+export CUDA_VISIBLE_DEVICES=0
+source "${ENV_DIR}/bin/activate"
+
+export CUDA_HOME="${CUDA_HOME:-/path/to/cuda/12.8.0}"
+export PATH="${CUDA_HOME}/bin:${PATH}"
+export LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH:-}"
+TORCH_LIB="$(python -c 'import os, torch; print(os.path.join(os.path.dirname(torch.__file__), "lib"))')"
+export LD_LIBRARY_PATH="${TORCH_LIB}:${LD_LIBRARY_PATH:-}"
+
+mkdir -p "${OUT_DIR}"
+cd "${REPO_DIR}/6D-LitePT"
+
+python train.py train \
+  --tv_root "${DATA_ROOT}" \
+  --out_dir "${OUT_DIR}" \
+  --epochs 100 \
+  --batch_size 1 \
+  --num_workers 4 \
+  --chunk_size 128 \
+  --grid_size 4 \
+  --train_stream_ref_cap 300000 \
+  --train_back_ref_cap 2700000 \
+  --val_stream_ref_cap 300000 \
+  --val_back_ref_cap 3000000 \
+  --test_stream_ref_cap 300000 \
+  --test_back_ref_cap 3000000 \
+  --stream_sampling_mode proportional \
+  --background_sampling_mode proportional \
+  --loss_name ftnmt \
+  --feature_set all

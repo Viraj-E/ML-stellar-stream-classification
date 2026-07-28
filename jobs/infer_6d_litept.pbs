@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#PBS -P YOUR_PROJECT
+#PBS -q gpuhopper
+#PBS -l walltime=04:00:00
+#PBS -l mem=255GB
+#PBS -l ncpus=12
+#PBS -l ngpus=1
+#PBS -l jobfs=100GB
+#PBS -N litept6d_infer
+#PBS -j oe
+
+set -euo pipefail
+
+REPO_DIR="/path/to/stellar-stream-classification"
+INPUT_H5="/path/to/snapshot.hdf5"
+CHECKPOINT="/path/to/litept_best_mcc.pt"
+METADATA="/path/to/litept_meta.json"
+OUTPUT_H5="/path/to/outputs/6D-LitePT/inference.hdf5"
+ENV_DIR="/path/to/LitePT_env"
+
+module purge
+module load python3/3.12.1 gcc/13.2.0 cuda/12.8.0
+
+export CUDA_VISIBLE_DEVICES=0
+source "${ENV_DIR}/bin/activate"
+
+export CUDA_HOME="${CUDA_HOME:-/path/to/cuda/12.8.0}"
+export PATH="${CUDA_HOME}/bin:${PATH}"
+export LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH:-}"
+TORCH_LIB="$(python -c 'import os, torch; print(os.path.join(os.path.dirname(torch.__file__), "lib"))')"
+export LD_LIBRARY_PATH="${TORCH_LIB}:${LD_LIBRARY_PATH:-}"
+
+mkdir -p "$(dirname "${OUTPUT_H5}")"
+cd "${REPO_DIR}/6D-LitePT"
+
+python inference.py \
+  --input_h5 "${INPUT_H5}" \
+  --part_type PartType4 \
+  --checkpoint "${CHECKPOINT}" \
+  --meta "${METADATA}" \
+  --output_h5 "${OUTPUT_H5}" \
+  --mode tiled \
+  --overwrite \
+  --center_mode mean \
+  --feature_set all \
+  --grid_size 4.0 \
+  --thresholds 0.5,0.6,0.7,0.8,0.9,0.95,0.975,0.99 \
+  --tile_strategy central_shell \
+  --tile_size 128.0 \
+  --tile_stride 64.0 \
+  --tile_min_particles 1 \
+  --gaussian_edge_weight 0.10 \
+  --progress_every 10

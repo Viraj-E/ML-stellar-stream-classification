@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#PBS -P YOUR_PROJECT
+#PBS -q gpuvolta
+#PBS -l walltime=03:00:00
+#PBS -l mem=191GB
+#PBS -l ncpus=24
+#PBS -l ngpus=2
+#PBS -l jobfs=50GB
+#PBS -N pointcloud_infer
+#PBS -j oe
+
+set -euo pipefail
+
+REPO_DIR="/path/to/stellar-stream-classification"
+INPUT_H5="/path/to/snapshot.hdf5"
+CHECKPOINT="/path/to/pointcloud_hybrid_best.pt"
+OUT_DIR="/path/to/outputs/PointCloud"
+ENV_DIR="/path/to/pytorch_env"
+
+module purge
+module load python3/3.12.1 cuda/12.8.0 gsl/2.7.1 openmpi/5.0.5
+module load binutils/2.43 hdf5/1.12.2 hwloc/2.11.2 gcc/13.2.0 fftw3/3.3.10
+
+export CUDA_VISIBLE_DEVICES=0,1
+source "${ENV_DIR}/bin/activate"
+
+mkdir -p "${OUT_DIR}"
+cd "${REPO_DIR}"
+
+python PointCloud/pointcloud.py infer "${INPUT_H5}" \
+  --out_dir "${OUT_DIR}" \
+  --ckpt_path "${CHECKPOINT}" \
+  --threshold 0.50 \
+  --infer_chunk_size 32768 \
+  --aux_feature_dtype float16

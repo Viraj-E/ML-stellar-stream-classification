@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+#PBS -P YOUR_PROJECT
+#PBS -q gpuvolta
+#PBS -l walltime=48:00:00
+#PBS -l mem=191GB
+#PBS -l ncpus=24
+#PBS -l ngpus=2
+#PBS -l jobfs=50GB
+#PBS -N pointcloud_train
+#PBS -j oe
+
+set -euo pipefail
+
+# ------------------------- User configuration -------------------------
+REPO_DIR="/path/to/stellar-stream-classification"
+DATA_ROOT="/path/to/train_val_test"
+OUT_DIR="/path/to/outputs/PointCloud"
+ENV_DIR="/path/to/pytorch_env"
+# ---------------------------------------------------------------------
+
+module purge
+module load python3/3.12.1 cuda/12.8.0 gsl/2.7.1 openmpi/5.0.5
+module load binutils/2.43 hdf5/1.12.2 hwloc/2.11.2 gcc/13.2.0 fftw3/3.3.10
+
+export CUDA_VISIBLE_DEVICES=0,1
+source "${ENV_DIR}/bin/activate"
+
+mkdir -p "${OUT_DIR}"
+cd "${REPO_DIR}"
+
+python PointCloud/pointcloud.py train \
+  --tv_root "${DATA_ROOT}" \
+  --out_dir "${OUT_DIR}" \
+  --epochs 100 \
+  --batch_size 32 \
+  --num_workers 4 \
+  --patch_k 48 \
+  --local_box_size 80 \
+  --train_stream_ref_cap 300000 \
+  --train_back_ref_cap 2700000 \
+  --val_stream_ref_cap 300000 \
+  --val_back_ref_cap 3000000 \
+  --stream_sampling_mode proportional \
+  --background_sampling_mode proportional \
+  --patch_space xyzv \
+  --patch_vel_weight 0.05
