@@ -114,10 +114,3 @@ adapted for occupied cells in six-dimensional stellar phase space, binary
 stream classification, and particle-level reconstruction of cell outputs.
 The upstream copyright and licence are retained in
 `licenses/LitePT-LICENSE`; see `THIRD_PARTY_NOTICES.md` for details.
-
-Before publication, replace the placeholders in `CITATION.cff` with the
-repository author's name and GitHub URL. The software citation may be updated
-to cite the associated paper after acceptance.
-
-See `docs/GITHUB_GUIDE.md` for the upload process and final pre-publication
-checklist.
