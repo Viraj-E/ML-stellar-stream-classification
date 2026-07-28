@@ -1,0 +1,5 @@
+numpy
+h5py
+scikit-learn
+torch
+# Install a GPU-enabled FAISS build separately when using the historical GPU path.
