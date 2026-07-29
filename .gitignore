@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+conda-env/
+.env
+
+# Editors and operating systems
+.DS_Store
+.vscode/
+.idea/
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Data and generated outputs
+data/
+outputs/
+results/
+plots/
+checkpoints/
+
+# Model checkpoints
+*.pt
+*.pth
+*.ckpt
+
+# Large scientific data
+*.h5
+*.hdf5
+*.npy
+*.npz
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Scheduler output
+*.o[0-9]*
+*.e[0-9]*
+slurm-*.out
