@@ -22,7 +22,6 @@ VoxelCNN/                Voxel CNN training and inference
 6D-LitePT/               6D-LitePT model, training, inference, and diagnostics
 jobs/                    Example PBS training and inference scripts
 docs/PARAMETERS.md       Guide to the main command-line parameters
-docs/GITHUB_GUIDE.md     First-time repository publication guide
 DEPENDENCIES.md          Required packages and tested hardware
 requirements-*.txt       Package lists for the three software stacks
 LICENSE                  MIT licence for this repository
